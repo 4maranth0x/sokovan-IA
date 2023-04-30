@@ -26,7 +26,16 @@ def leerMapa():
     return content, jugador_pos, cajas_pos
 
 nivel = leerMapa()
-posicion_caja_n = [i for i in range(len(nivel)) for j in range(len(nivel[i])) if isinstance(nivel[i][j], list) and nivel[i][j][0] == n][0:2]
+
+def contar_cajas(ruta_archivo):
+    with open(ruta_archivo, "r") as file:
+        content = file.readlines()
+    numCajas = sum([1 for linea in content if "," in linea]) - 1
+    return numCajas if numCajas > 0 else None
+
+numCajas = contar_cajas(nivel)
+
+posicion_caja_n = [i for i in range(len(nivel)) for j in range(len(nivel[i])) if isinstance(nivel[i][j], list) and nivel[i][j][0] == numCajas][0:2]
 posicion_caja_1 = [i for i in range(len(nivel)) for j in range(len(nivel[i])) if isinstance(nivel[i][j], list) and nivel[i][j][0] == 1][0:2]
 
 #Analiza los movimientos que el jugador/IA tiene disponibles a su alrededor y genera una lista con ellos 
@@ -61,3 +70,39 @@ def elegirMovimiento(movimientos_posibles, jerarquia):
     print("No puedo moverme. Help")
     return None
 
+def resolverNivel():
+    # Leer el mapa
+    nivel, jugador_pos, cajas_pos = leerMapa()
+    if nivel is None:
+        print("Error: El archivo de nivel es inválido.")
+        return
+
+    # Contar cajas y definir el estado del juego
+    numCajas = contar_cajas(nivel)
+    cajasEnObjetivo = 0
+    restantes = numCajas
+
+    # Resolver el nivel
+    movimientos = []
+    while cajasEnObjetivo < numCajas:
+        # Mostrar el nivel y preguntar por el siguiente movimiento
+        leerMapa(nivel, jugador_pos, cajas_pos)
+        movimientos_posibles = movimientosDisponibles(nivel, jugador_pos[0], jugador_pos[1])
+        movimiento = elegirMovimiento(movimientos_posibles, ["U", "D", "L", "R", ""])
+        if movimiento is None:
+            print("No hay movimientos disponibles.")
+            break
+
+        # Mover el jugador y actualizar la posición de las cajas
+        if movimiento != "":
+            movimientos.append(movimiento)
+        nivel, jugador_pos, cajas_pos, caja_empujada = elegirMovimiento(nivel, jugador_pos, cajas_pos, movimiento)
+
+        # Actualizar el estado del juego
+        if caja_empujada:
+            if nivel[caja_empujada[0]][caja_empujada[1]] == 2:
+                cajasEnObjetivo += 1
+                restantes -= 1
+
+    # Imprimir los movimientos usados
+    print(movimientos)
