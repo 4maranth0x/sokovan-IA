@@ -102,7 +102,11 @@ def obtener_movimientos(mapa, pos):
     return movimientos
 
 
-def dfs(mapa, jugador_pos, cajas_pos, cajasEnObjetivo):
+def dfs():
+    mapa, jugador_pos, cajas_pos, cajasEnObjetivo, cajas = leerMapa()
+    if mapa is None:
+        print("Error: mapa no válido")
+        return None
     visitados = set()
     pila = [(jugador_pos, cajas_pos)]
     while pila:
@@ -148,5 +152,11 @@ def dfs_limitado(mapa, jugador_pos, cajas_pos, cajasEnObjetivo, profundidad_maxi
         if (pos_jugador, pos_cajas) in visitados:
             continue
         
+# Imprimir la lista generada por bfs()
+print(' '.join(bfs(leerMapa())))
 
+# Imprimir la lista generada por dfs()
+#print(' '.join(dfs(nivel)))
 
+# Imprimir la lista generada por iddfs()
+print(' '.join(iddfs()))
