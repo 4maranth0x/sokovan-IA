@@ -8,7 +8,7 @@ def leerMapa():
         content = file.readlines()
     content = [linea.strip() for linea in content]
     filas = len(content)
-    columnas = len(content[0])
+    columnas = max(len(linea) for linea in content)
     mapa = []
     jugador_pos = None
     cajas_pos = []
@@ -16,7 +16,9 @@ def leerMapa():
     for i in range(filas):
         fila = []
         for j in range(columnas):
-            if content[i][j] == 'W':
+            if j >= len(content[i]):
+                fila.append(1) # fuera del mapa
+            elif content[i][j] == 'W':
                 fila.append(1) # pared
             elif content[i][j] == '0':
                 fila.append(0) # camino
@@ -76,6 +78,30 @@ def mover_jugador(mapa, jugador_pos, cajas_pos, direccion):
     return mapa, jugador_pos, cajas_pos
 
 
+def obtener_movimientos(mapa, pos):
+    movimientos = []
+    filas, columnas = len(mapa), len(mapa[0])
+    x, y = pos
+    
+    # Movimiento hacia arriba
+    if x > 0 and mapa[x-1][y] != 1:
+        movimientos.append((x-1, y, "U"))
+    
+    # Movimiento hacia abajo
+    if x < filas-1 and mapa[x+1][y] != 1:
+        movimientos.append((x+1, y, "D"))
+    
+    # Movimiento hacia la izquierda
+    if y > 0 and mapa[x][y-1] != 1:
+        movimientos.append((x, y-1, "L"))
+    
+    # Movimiento hacia la derecha
+    if y < columnas-1 and mapa[x][y+1] != 1:
+        movimientos.append((x, y+1, "R"))
+    
+    return movimientos
+
+
 def dfs(mapa, jugador_pos, cajas_pos, cajasEnObjetivo):
     visitados = set()
     pila = [(jugador_pos, cajas_pos)]
@@ -123,26 +149,4 @@ def dfs_limitado(mapa, jugador_pos, cajas_pos, cajasEnObjetivo, profundidad_maxi
             continue
         
 
-def obtener_movimientos(mapa, pos):
-    movimientos = []
-    filas, columnas = len(mapa), len(mapa[0])
-    x, y = pos
-    
-    # Movimiento hacia arriba
-    if x > 0 and mapa[x-1][y] != 1:
-        movimientos.append((x-1, y, "U"))
-    
-    # Movimiento hacia abajo
-    if x < filas-1 and mapa[x+1][y] != 1:
-        movimientos.append((x+1, y, "D"))
-    
-    # Movimiento hacia la izquierda
-    if y > 0 and mapa[x][y-1] != 1:
-        movimientos.append((x, y-1, "L"))
-    
-    # Movimiento hacia la derecha
-    if y < columnas-1 and mapa[x][y+1] != 1:
-        movimientos.append((x, y+1, "R"))
-    
-    return movimientos
 
