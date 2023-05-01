@@ -3,7 +3,7 @@ import os
 
 def leerMapa():
     mapa = input("¿Qué nivel jugaré? ")
-    nivel_ruta = os.path.join("nivelesAqui", mapa)
+    #nivel_ruta = os.path.join("nivelesAqui", mapa)
     with open(f"nivelesAqui/{mapa}.txt", "r") as file:
         content = file.readlines()
     content = [linea.strip() for linea in content]
@@ -27,14 +27,20 @@ def leerMapa():
                 cajasEnObjetivo += 1
             else:
                 fila.append(0) # camino
-                if content[i][j] == 'P':
-                    if jugador_pos is not None:
-                        return None, None, None, None, None # hay más de un jugador
-                    jugador_pos = (i, j)
-                elif content[i][j] == 'C':
-                    caja_pos = (i, j)
-                    cajas_pos.append(caja_pos)
         mapa.append(fila)
+    
+    # Leer las posiciones del jugador y las cajas después del mapa
+    caja1_pos_str = content[-1].split(',')
+    caja1_pos = (int(caja1_pos_str[0]), int(caja1_pos_str[1]))
+    cajas_pos.append(caja1_pos)
+    if "," in content[-3]:
+        jugador_pos_str = content[-3].split(',')
+        caja2_pos_str = content[-2].split(',')
+        caja2_pos = (int(caja2_pos_str[0]), int(caja2_pos_str[1]))
+        cajas_pos.append(caja2_pos)
+    else:
+        jugador_pos_str = content[-2].split(',')
+    jugador_pos = (int(jugador_pos_str[0]), int(jugador_pos_str[1]))
     if jugador_pos is None:
         return None, None, None, None, None # no hay jugador
     cajas = len(cajas_pos)
@@ -121,6 +127,7 @@ def dfs():
             if (nuevo_pos_jugador, nuevo_pos_cajas) not in visitados:
                 pila.append((nuevo_pos_jugador, nuevo_pos_cajas, movimiento))
 
+
 def bfs(mapa, jugador_pos, cajas_pos, cajasEnObjetivo):
     visitados = set()
     cola = deque([(jugador_pos, cajas_pos, [])])
@@ -152,11 +159,3 @@ def dfs_limitado(mapa, jugador_pos, cajas_pos, cajasEnObjetivo, profundidad_maxi
         if (pos_jugador, pos_cajas) in visitados:
             continue
         
-# Imprimir la lista generada por bfs()
-print(' '.join(bfs(leerMapa())))
-
-# Imprimir la lista generada por dfs()
-#print(' '.join(dfs(nivel)))
-
-# Imprimir la lista generada por iddfs()
-print(' '.join(iddfs()))
