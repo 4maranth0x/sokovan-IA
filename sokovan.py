@@ -121,7 +121,7 @@ def dfs_limitado(mapa, jugador_pos, cajas_pos, cajasEnObjetivo, profundidad_maxi
             return movimientos # Todas las cajas están en los objetivos
         if (pos_jugador, pos_cajas) in visitados:
             continue
-
+        
 
 def obtener_movimientos(mapa, pos):
     movimientos = []
