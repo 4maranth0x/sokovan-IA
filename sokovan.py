@@ -1,4 +1,5 @@
 import os
+import busqueda
 
 #Lee el mapa que se le entrega en el input y lo asume como mapa
 def leerMapa():    
