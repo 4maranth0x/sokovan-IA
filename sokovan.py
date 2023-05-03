@@ -1,77 +1,50 @@
-from collections import deque
-import os
 
-def inicio():
-    mapa = input("¿Qué nivel jugaré? ")
-    matriz, pos_jugador, pos_cajas, cajasEnObjetivo, cajas = leerMapa(mapa)
-    if matriz is None:
-        return None, None, None, None
-    pos_jugador = posicionJugador(mapa)
-    pos_cajas = posicionCajas(mapa)
-    return matriz, pos_jugador, pos_cajas, cajasEnObjetivo, cajas
-    
+def leerMapa(content):
+  contentM = [linea.strip() for linea in content]
+  filas = len(contentM)
+  columnas = max(len(linea) for linea in contentM)
+  mapa = []
+  cajas_faltantes = 0
+  jugador_pos = posicionJugador(content)
+  cajas_pos = posicionCajas(content)
+  if jugador_pos is None:
+    return None, None, None, None  # no hay jugador
+  cajas = len(cajas_pos)
+  for i in range(filas-(cajas+1)):
+    fila = []
+    for j in range(columnas):
+      if j >= len(contentM[i]):
+        fila.append(1)  # fuera del mapa
+      elif contentM[i][j] == 'W':
+        fila.append(1)  # pared
+      elif contentM[i][j] == '0':
+        fila.append(0)  # camino
+      elif contentM[i][j] == 'X':
+        fila.append(2)  # objetivo
+        cajas_faltantes += 1
+      else:
+        fila.append(0)  # camino
+    mapa.append(fila)
+  return mapa, jugador_pos, cajas_pos, cajas_faltantes, cajas
 
-def leerMapa():
-    with open(f"nivelesAqui/{mapa}.txt", "r") as file:
-        content = file.readlines()
-    content = [linea.strip() for linea in content]
-    filas = len(content)
-    columnas = max(len(linea) for linea in content)
-    mapa = []
-    jugador_pos = None
-    cajas_pos = []
-    cajasEnObjetivo = 0
-    for i in range(filas):
-        fila = []
-        for j in range(columnas):
-            if j >= len(content[i]):
-                fila.append(1) # fuera del mapa
-            elif content[i][j] == 'W':
-                fila.append(1) # pared
-            elif content[i][j] == '0':
-                fila.append(0) # camino
-            elif content[i][j] == 'X':
-                fila.append(2) # objetivo
-                cajasEnObjetivo += 1
-            else:
-                fila.append(0) # camino
-                if content[i][j] == 'P':
-                    if jugador_pos is not None:
-                        return None, None, None # hay más de un jugador
-                    jugador_pos = (i, j)
-                elif content[i][j] == 'C':
-                    caja_pos = (i, j)
-                    cajas_pos.append(caja_pos)
-        mapa.append(fila)
-    if jugador_pos is None:
-        return None, None, None, None # no hay jugador
-    cajas = len(cajas_pos)
-    return mapa, jugador_pos, cajas_pos, cajasEnObjetivo, cajas
-
-nivel = leerMapa()
-
-def posicionJugador():
-    with open(f"nivelesAqui/{mapa}.txt", "r") as file:
-        content = file.readlines()
+def posicionJugador(content):
     jugador_pos = None
     for linea in content:
-        if "P" in linea:
+        if "W" not in linea:
             jugador_pos = tuple(map(int, linea.split(",")))
             break
     return jugador_pos
 
-posJugador = posicionJugador()
 
-def posicionCajas():
-    with open(f"nivelesAqui/{mapa}.txt", "r") as file:
-        content = file.readlines()
-    cajas_pos = []
-    for linea in content:
-        if "C" in linea:
-            caja_pos = tuple
-
-
-posCajas = posicionCajas()
+def posicionCajas(content):
+  cajas_pos=[]
+  i = 0
+  while i < len(content)-1:
+    if "W" not in content[i]:
+      caja_pos = tuple(map(int, content[i+1].split(",")))
+      cajas_pos.append(caja_pos)
+    i += 1
+  return cajas_pos
 
 
 def mover_jugador(mapa, jugador_pos, cajas_pos, direccion):
@@ -130,6 +103,18 @@ def obtener_movimientos(mapa, pos):
     
     return movimientos
 
+def inicio():
+    mapa = input("¿Qué nivel jugaré? ")
+    with open(f"nivelesAqui/{mapa}.txt", "r") as file:
+        content = file.readlines()
+    matriz, pos_jugador, pos_cajas, cajas_faltantes, cajas = leerMapa(content)
+    if matriz is None:
+        return None, None, None, None
+    pos_jugador = posicionJugador(content)
+    pos_cajas = posicionCajas(content)
+    return matriz, pos_jugador, pos_cajas, cajas_faltantes, cajas
+
+inicio()
 
 def dfs():
     mapa, jugador_pos, cajas_pos, cajasEnObjetivo, cajas = leerMapa()
