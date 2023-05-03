@@ -116,6 +116,54 @@ def inicio():
 
 inicio()
 
+
+def movimientosPosibles(nivel):
+    pos_jugador = None
+    casillas_disponibles = []
+    for i in range(len(nivel)):
+        for j in range(len(nivel[i])):
+            if nivel[i][j] == 1:
+                continue # pared
+            elif nivel[i][j] == 0 or nivel[i][j] == 2:
+                if pos_jugador is None:
+                    pos_jugador = (i, j)
+                else:
+                    # hay más de un jugador
+                    return None
+            elif nivel[i][j] == 'P':
+                pos_jugador = (i, j)
+            elif nivel[i][j] == 'C':
+                pos_caja = (i, j)
+                direccion = posicionCajas(nivel, pos_caja, pos_jugador)
+                if direccion is not None:
+                    siguiente_pos = mover_jugador(nivel, pos_jugador, direccion)
+                    if siguiente_pos is not None and nivel[siguiente_pos[0]][siguiente_pos[1]] in [0,2]:
+                        casillas_disponibles.append((siguiente_pos, direccion))
+                        
+    if pos_jugador is None:
+        # no hay jugador
+        return None
+    movimientos = []
+    if pos_jugador[0] > 0 and nivel[pos_jugador[0]-1][pos_jugador[1]] in [0,2]:
+        casillaU = (pos_jugador[0]-1, pos_jugador[1])
+        movimientos.append((casillaU, "U"))
+    if pos_jugador[0] < len(nivel)-1 and nivel[pos_jugador[0]+1][pos_jugador[1]] in [0,2]:
+        casillaD = (pos_jugador[0]+1, pos_jugador[1])
+        movimientos.append((casillaD, "D"))
+    if pos_jugador[1] < len(nivel[0])-1 and nivel[pos_jugador[0]][pos_jugador[1]+1] in [0,2]:
+        casillaR = (pos_jugador[0], pos_jugador[1]+1)
+        movimientos.append((casillaR, "R"))
+    if pos_jugador[1] > 0 and nivel[pos_jugador[0]][pos_jugador[1]-1] in [0,2]:
+        casillaL = (pos_jugador[0], pos_jugador[1]-1)
+        movimientos.append((casillaL, "L"))
+        
+    movimientos.extend(casillas_disponibles)
+    
+    return movimientos
+
+
+
+
 def dfs():
     mapa, jugador_pos, cajas_pos, cajasEnObjetivo, cajas = leerMapa()
     if mapa is None:
