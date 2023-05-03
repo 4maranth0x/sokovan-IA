@@ -3,7 +3,7 @@ import os
 
 def inicio():
     mapa = input("¿Qué nivel jugaré? ")
-    matriz, jugador_pos, cajas_pos, cajasEnObjetivo, cajas = leerMapa(mapa)
+    matriz, pos_jugador, pos_cajas, cajasEnObjetivo, cajas = leerMapa(mapa)
     if matriz is None:
         return None, None, None, None
     pos_jugador = posicionJugador(mapa)
@@ -48,6 +48,8 @@ def leerMapa():
     cajas = len(cajas_pos)
     return mapa, jugador_pos, cajas_pos, cajasEnObjetivo, cajas
 
+nivel = leerMapa()
+
 def posicionJugador():
     with open(f"nivelesAqui/{mapa}.txt", "r") as file:
         content = file.readlines()
@@ -58,6 +60,7 @@ def posicionJugador():
             break
     return jugador_pos
 
+posJugador = posicionJugador()
 
 def posicionCajas():
     with open(f"nivelesAqui/{mapa}.txt", "r") as file:
@@ -67,8 +70,7 @@ def posicionCajas():
         if "C" in linea:
             caja_pos = tuple
 
-nivel = leerMapa()
-posJugador = posicionJugador()
+
 posCajas = posicionCajas()
 
 
