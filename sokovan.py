@@ -1,9 +1,17 @@
 from collections import deque
 import os
 
-def leerMapa():
+def inicio():
     mapa = input("¿Qué nivel jugaré? ")
-    #nivel_ruta = os.path.join("nivelesAqui", mapa)
+    matriz, jugador_pos, cajas_pos, cajasEnObjetivo, cajas = leerMapa(mapa)
+    if matriz is None:
+        return None, None, None, None
+    pos_jugador = posicionJugador(mapa)
+    pos_cajas = posicionCajas(mapa)
+    return matriz, pos_jugador, pos_cajas, cajasEnObjetivo, cajas
+    
+
+def leerMapa():
     with open(f"nivelesAqui/{mapa}.txt", "r") as file:
         content = file.readlines()
     content = [linea.strip() for linea in content]
@@ -27,26 +35,42 @@ def leerMapa():
                 cajasEnObjetivo += 1
             else:
                 fila.append(0) # camino
+                if content[i][j] == 'P':
+                    if jugador_pos is not None:
+                        return None, None, None # hay más de un jugador
+                    jugador_pos = (i, j)
+                elif content[i][j] == 'C':
+                    caja_pos = (i, j)
+                    cajas_pos.append(caja_pos)
         mapa.append(fila)
-    
-    # Leer las posiciones del jugador y las cajas después del mapa
-    caja1_pos_str = content[-1].split(',')
-    caja1_pos = (int(caja1_pos_str[0]), int(caja1_pos_str[1]))
-    cajas_pos.append(caja1_pos)
-    if "," in content[-3]:
-        jugador_pos_str = content[-3].split(',')
-        caja2_pos_str = content[-2].split(',')
-        caja2_pos = (int(caja2_pos_str[0]), int(caja2_pos_str[1]))
-        cajas_pos.append(caja2_pos)
-    else:
-        jugador_pos_str = content[-2].split(',')
-    jugador_pos = (int(jugador_pos_str[0]), int(jugador_pos_str[1]))
     if jugador_pos is None:
-        return None, None, None, None, None # no hay jugador
+        return None, None, None, None # no hay jugador
     cajas = len(cajas_pos)
     return mapa, jugador_pos, cajas_pos, cajasEnObjetivo, cajas
 
+def posicionJugador():
+    with open(f"nivelesAqui/{mapa}.txt", "r") as file:
+        content = file.readlines()
+    jugador_pos = None
+    for linea in content:
+        if "P" in linea:
+            jugador_pos = tuple(map(int, linea.split(",")))
+            break
+    return jugador_pos
+
+
+def posicionCajas():
+    with open(f"nivelesAqui/{mapa}.txt", "r") as file:
+        content = file.readlines()
+    cajas_pos = []
+    for linea in content:
+        if "C" in linea:
+            caja_pos = tuple
+
 nivel = leerMapa()
+posJugador = posicionJugador()
+posCajas = posicionCajas()
+
 
 def mover_jugador(mapa, jugador_pos, cajas_pos, direccion):
     # definir cambios en fila y columna para cada dirección
@@ -55,19 +79,16 @@ def mover_jugador(mapa, jugador_pos, cajas_pos, direccion):
         "D": (1, 0),
         "L": (0, -1),
         "R": (0, 1),
-    }
-    fila_jugador, col_jugador = jugador_pos
+    } 
     # calcular la posición a la que se quiere mover el jugador
-    fila_nueva = fila_jugador + cambios[direccion][0]
-    col_nueva = col_jugador + cambios[direccion][1]
+    fila_nueva, col_nueva = jugador_pos[0] + cambios[direccion][0], jugador_pos[1] + cambios[direccion][1]
     # si la posición a la que se quiere mover es una pared, no se puede mover
     if mapa[fila_nueva][col_nueva] == 1:
         return mapa, jugador_pos, cajas_pos
     # si hay una caja en la posición a la que se quiere mover
     if (fila_nueva, col_nueva) in cajas_pos:
         # calcular la posición detrás de la caja
-        fila_caja_nueva = fila_nueva + cambios[direccion][0]
-        col_caja_nueva = col_nueva + cambios[direccion][1]
+        fila_caja_nueva, col_caja_nueva = fila_nueva + cambios[direccion][0], col_nueva + cambios[direccion][1]
         # si la posición detrás de la caja es una pared o ya hay una caja ahí, no se puede mover
         if mapa[fila_caja_nueva][col_caja_nueva] == 1 or (fila_caja_nueva, col_caja_nueva) in cajas_pos:
             return mapa, jugador_pos, cajas_pos
@@ -77,10 +98,10 @@ def mover_jugador(mapa, jugador_pos, cajas_pos, direccion):
     # mover el jugador y actualizar su posición
     jugador_pos = (fila_nueva, col_nueva)
     # actualizar el mapa
-    mapa[fila_jugador][col_jugador] = 0
-    mapa[fila_nueva][col_nueva] = 3
-    for caja_pos in cajas_pos:
-        mapa[caja_pos[0]][caja_pos[1]] = 2
+    mapa[jugador_pos[0]][jugador_pos[1]] = 3
+    mapa[jugador_pos[0] - cambios[direccion][0]][jugador_pos[1] - cambios[direccion][1]] = 0
+    for fila, col in cajas_pos:
+        mapa[fila][col] = 2
     return mapa, jugador_pos, cajas_pos
 
 
@@ -126,36 +147,4 @@ def dfs():
             nuevo_mapa, nuevo_pos_jugador, nuevo_pos_cajas = mover_jugador(mapa, pos_jugador, pos_cajas, movimiento)
             if (nuevo_pos_jugador, nuevo_pos_cajas) not in visitados:
                 pila.append((nuevo_pos_jugador, nuevo_pos_cajas, movimiento))
-
-
-def bfs(mapa, jugador_pos, cajas_pos, cajasEnObjetivo):
-    visitados = set()
-    cola = deque([(jugador_pos, cajas_pos, [])])
-    while cola:
-        pos_jugador, pos_cajas, movimientos = cola.popleft()
-        if all(caja in cajasEnObjetivo for caja in pos_cajas):
-            return movimientos # Todas las cajas están en los objetivos
-        if (pos_jugador, pos_cajas) in visitados:
-            continue
-        visitados.add((pos_jugador, pos_cajas))
-        for movimiento in ["U", "D", "L", "R"]:
-            nuevo_mapa, nuevo_pos_jugador, nuevo_pos_cajas = mover_jugador(mapa, pos_jugador, pos_cajas, movimiento)
-            if (nuevo_pos_jugador, nuevo_pos_cajas) not in visitados:
-                cola.append((nuevo_pos_jugador, nuevo_pos_cajas, movimientos + [movimiento]))
-
-def iddfs(mapa, jugador_pos, cajas_pos, cajasEnObjetivo):
-    for profundidad_maxima in range(1, 100):
-        resultado = dfs_limitado(mapa, jugador_pos, cajas_pos, cajasEnObjetivo, profundidad_maxima)
-        if resultado is not None:
-            return resultado
-
-def dfs_limitado(mapa, jugador_pos, cajas_pos, cajasEnObjetivo, profundidad_maxima):
-    visitados = set()
-    pila = [(jugador_pos, cajas_pos, [])]
-    while pila:
-        pos_jugador, pos_cajas, movimientos = pila.pop()
-        if all(caja in cajasEnObjetivo for caja in pos_cajas):
-            return movimientos # Todas las cajas están en los objetivos
-        if (pos_jugador, pos_cajas) in visitados:
-            continue
-        
+                
