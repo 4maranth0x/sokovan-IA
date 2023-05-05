@@ -76,38 +76,38 @@ def busquedaPreferentePorAmplitud(estadoInicial, profundidadMaxima):
                 visitados.add(hijo)
                 cola.append((hijo, profundidadActual + 1))
     return None
-
-def busquedaProfundidad(estado_inicial, profundidad_maxima):
-    pila = [(estado_inicial, 0)]
+#Realiza una búsqueda de los movimientos usados para hallar una solución mediante el algoritmo por DFS
+def busquedaProfundidad(estadoInicial, profundidadMaxima):
+    pila = [(estadoInicial, 0)]
     visitados = set()
     while pila:
-        estado_actual, profundidad_actual = pila.pop()
-        if estado_actual.es_estado_meta():
-            return estado_actual.solucion()
-        if profundidad_actual >= profundidad_maxima:
+        estadoActual, profundidadActual = pila.pop()
+        if estadoActual.esEstadoMeta():
+            return estadoActual.solucion()
+        if profundidadActual >= profundidadMaxima:
             continue
-        for hijo in estado_actual.expandir():
+        for hijo in estadoActual.expandir():
             if hijo not in visitados:
                 visitados.add(hijo)
-                pila.append((hijo, profundidad_actual + 1))
+                pila.append((hijo, profundidadActual + 1))
     return None
-
-def busquedaProfundidadIterativa(estado_inicial, profundidad_maxima):
-    for profundidad in range(profundidad_maxima):
-        resultado = busquedaProfundidadLimitada(estado_inicial, profundidad)
+#Realiza una búsqueda de los movimientos usados para hallar una solución mediante el algoritmo por IDDFS
+def busquedaProfundidadIterativa(estadoInicial, profundidadMaxima):
+    for profundidad in range(profundidadMaxima):
+        resultado = busquedaProfundidadLimitada(estadoInicial, profundidad)
         if resultado is not None:
             return resultado
     return None
+#Funciona como cota para busquedaProfundidadIterativa
+def busquedaProfundidadLimitada(estadoActual, profundidadMaxima):
+    if estadoActual.esEstadoMeta():
+        return estadoActual.solucion()
 
-def busquedaProfundidadLimitada(estado_actual, profundidad_maxima):
-    if estado_actual.es_estado_meta():
-        return estado_actual.solucion()
-
-    if profundidad_maxima == 0:
+    if profundidadMaxima == 0:
         return None
 
-    for hijo in estado_actual.expandir():
-        resultado = busquedaProfundidadLimitada(hijo, profundidad_maxima - 1)
+    for hijo in estadoActual.expandir():
+        resultado = busquedaProfundidadLimitada(hijo, profundidadMaxima - 1)
         if resultado is not None:
             return resultado
 
