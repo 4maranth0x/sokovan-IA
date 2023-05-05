@@ -1,72 +1,69 @@
-from funciones import leerMapa, busqueda_preferente_por_amplitud
+#Integrantes
+# Maria Paula Giraldo. 2022411-3743
+#Natalia Andrea Marin Hernandez. 2041622-3743
+#Alejandro Lasso Medina. 2040393
+# #
+
+from funciones import leerMapa, busquedaPreferentePorAmplitud
+
+#Inicia el programa, recibe un archivo de texto y retorna el mapa, la posición del jugador, 
+#la posición de las cajas, el número de cajas faltantes y el número de cajas.
 def inicio():
   mapa = input("¿Qué nivel jugaré? ")
   with open(f"nivelesAqui/{mapa}.txt", "r") as file:
     content = file.readlines()
-  matriz, estado_inicial, estado_meta, cajas_faltantes, cajas = leerMapa(content)
-  return matriz, estado_inicial, estado_meta, cajas_faltantes, cajas
+  matriz, estadoInicial, estadoMeta, cajasFaltantes, cajas = leerMapa(content)
+  return matriz, estadoInicial, estadoMeta, cajasFaltantes, cajas
 
-mapa, estado_inicial, estado_meta, caja_falta, caja_total = inicio()
+mapa, estadoInicial, estadoMeta, cajaFalta, cajaTotal = inicio()
 
+#Clase que identifica y desarrolla el estado del juego
 class Estado:
     def __init__(self, jugador, cajas):
         self.jugador = jugador
         self.cajas = set(cajas)
         self.paredes = set((x, y) for x in range(len(mapa)) for y in range(len(mapa[0])) if mapa[x][y] == 1)
-        self.cajas_ocupadas = set(cajas)
-        self.cajas_faltantes = caja_falta
-        self.es_meta = None
+        self.cajasOcupadas = set(cajas)
+        self.cajasFaltantes = cajaFalta
+        self.esMeta = None
         
-    def es_estado_meta(self):
-        if self.es_meta is not None:
-            return self.es_meta
-        
-        self.es_meta = len(self.cajas) == len(estado_meta) and self.cajas.issuperset(estado_meta)
-        return self.es_meta
-    
+    #Identifica si el estado actual es meta o no
+    def esEstadoMeta(self):
+        if self.esMeta is not None:
+            return self.esMeta  
+        self.esMeta = len(self.cajas) == len(estadoMeta) and self.cajas.issuperset(estadoMeta)
+        return self.esMeta
+    #Expande las casillas aledañas a la posición del jugador
     def expandir(self):
         hijos = []
         for movimiento in ["U", "D", "L", "R"]:
             dx, dy = movimientos[movimiento]
-            jugador_nuevo = (self.jugador[0] + dx, self.jugador[1] + dy)
-            
-            if jugador_nuevo in self.paredes:
+            jugadorNuevo = (self.jugador[0] + dx, self.jugador[1] + dy)
+            if jugadorNuevo in self.paredes:
                 continue
-            
-            if jugador_nuevo in self.cajas_ocupadas:
-                caja_nueva = (jugador_nuevo[0] + dx, jugador_nuevo[1] + dy)
-                
-                if caja_nueva in self.paredes or caja_nueva in self.cajas_ocupadas:
+            if jugadorNuevo in self.cajasOcupadas:
+                cajaNueva = (jugadorNuevo[0] + dx, jugadorNuevo[1] + dy)
+                if cajaNueva in self.paredes or cajaNueva in self.cajasOcupadas:
                     continue
-                
-                cajas_nuevas = self.cajas.copy()
-                cajas_nuevas.remove(jugador_nuevo)
-                cajas_nuevas.add(caja_nueva)
-                hijos.append(Estado(jugador_nuevo, cajas_nuevas))
+                cajasNuevas = self.cajas.copy()
+                cajasNuevas.remove(jugadorNuevo)
+                cajasNuevas.add(cajaNueva)
+                hijos.append(Estado(jugadorNuevo, cajasNuevas))
             else:
-                hijos.append(Estado(jugador_nuevo, self.cajas))
-                
+                hijos.append(Estado(jugadorNuevo, self.cajas))         
         return hijos
+#Se crea el estado inicial y el estado meta
+jugador = estadoInicial[0]
+cajas = set(tuple(c) for c in estadoInicial[1])
+estadoInicial = Estado(jugador, cajas)
+estadoMeta = set(tuple(c) for c in estadoMeta)
 
-
-
-
-# Creamos el estado inicial y el estado meta
-jugador = estado_inicial[0]
-cajas = set(tuple(c) for c in estado_inicial[1])
-estado_inicial = Estado(jugador, cajas)
-estado_meta = set(tuple(c) for c in estado_meta)
-
-# Creamos un diccionario para los movimientos
+#Diccionario para los movimientos
 movimientos = {"U": (-1, 0), "D": (1, 0), "L": (0, -1), "R": (0, 1)}
 
-# Ejecutamos la búsqueda
-solucion = busqueda_preferente_por_amplitud(estado_inicial,64)
-
-# Imprimimos la solución
+solucion = busquedaPreferentePorAmplitud(estadoInicial,64)
 if solucion:
     for movimiento in solucion:
         print(movimiento)
 else:
     print("No se encontró solución.")
-
