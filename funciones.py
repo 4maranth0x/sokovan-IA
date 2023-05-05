@@ -1,39 +1,48 @@
+#Integrantes
+# Maria Paula Giraldo. 2022411-3743
+#Natalia Andrea Marin Hernandez. 2041622-3743
+#Alejandro Lasso Medina. 2040393
+# #
+
 import sys
 from collections import deque
 
+#Identifica la tupla que representa la posición del jugador dentro de un archivo de texto y la retorna
 def posicionJugador(content):
-  jugador_pos = None
+  jugadorPos = None
   for linea in content:
     if "W" not in linea:
-      jugador_pos = tuple(map(int, linea.split(",")))
+      jugadorPos = tuple(map(int, linea.split(",")))
       break
-  return jugador_pos
+  return jugadorPos
 
+#Identifica las tuplas que representan la posición de las cajas dentro de un archivo de texto y las retornas
 def posicionCajas(content):
-  cajas_pos = []
+  cajasPos = []
   i = 0
   while i < len(content) - 1:
     if "W" not in content[i]:
-      caja_pos = tuple(map(int, content[i + 1].split(",")))
-      cajas_pos.append(caja_pos)
+      cajaPos = tuple(map(int, content[i + 1].split(",")))
+      cajasPos.append(cajaPos)
     i += 1
-  return cajas_pos
-  
+  return cajasPos
+
+#Lee los carácteres dentro de un archivo de texto y los transcribe como una matriz para reprensentar el mapa
 def leerMapa(content):
   contentM = [linea.strip() for linea in content]
   filas = len(contentM)
   columnas = max(len(linea) for linea in contentM)
   mapa = []
-  cajas_faltantes = 0
-  estado_inicial = []
-  estado_meta = []
-  jugador_pos = posicionJugador(content)
-  cajas_pos = posicionCajas(content)
-  if jugador_pos is None:
+  cajasFaltantes = 0
+  estadoInicial = []
+  estadoMeta = []
+  jugadorPos = posicionJugador(content)
+  cajasPos = posicionCajas(content)
+  if jugadorPos is None:
     sys.exit("no hay jugador")
-  cajas = len(cajas_pos)
-  estado_inicial.append(jugador_pos)
-  estado_inicial.append(cajas_pos)
+  cajas = len(cajasPos)
+  estadoInicial.append(jugadorPos)
+  estadoInicial.append(cajasPos)
   for i in range(filas - (cajas + 1)):
     fila = []
     for j in range(columnas):
@@ -45,25 +54,25 @@ def leerMapa(content):
         fila.append(0)  # camino
       elif contentM[i][j] == 'X':
         fila.append(2)  # objetivo
-        cajas_faltantes += 1
-        estado_meta.append([i,j])
+        cajasFaltantes += 1
+        estadoMeta.append([i,j])
       else:
         fila.append(0)  # camino
     mapa.append(fila)
-  return mapa, estado_inicial, estado_meta, cajas_faltantes, cajas
+  return mapa, estadoInicial, estadoMeta, cajasFaltantes, cajas
 
-
-def busqueda_preferente_por_amplitud(estado_inicial, profundidad_maxima):
-    cola = deque([(estado_inicial, 0)])
+#Realiza una búsqueda de los movimientos usados para hallar una solución mediante el algoritmo por BFS
+def busquedaPreferentePorAmplitud(estadoInicial, profundidadMaxima):
+    cola = deque([(estadoInicial, 0)])
     visitados = set()
     while cola:
-        estado_actual, profundidad_actual = cola.popleft()
-        if estado_actual.es_estado_meta():
-            return estado_actual.solucion()
-        if profundidad_actual >= profundidad_maxima:
+        estadoActual, profundidadActual = cola.popleft()
+        if estadoActual.esEstadoMeta():
+            return estadoActual.solucion()
+        if profundidadActual >= profundidadMaxima:
             continue
-        for hijo in estado_actual.expandir():
+        for hijo in estadoActual.expandir():
             if hijo not in visitados:
                 visitados.add(hijo)
-                cola.append((hijo, profundidad_actual + 1))
+                cola.append((hijo, profundidadActual + 1))
     return None
