@@ -60,21 +60,21 @@ estadoMeta = set(tuple(c) for c in estadoMeta)
 
 #Diccionario para los movimientos
 movimientos = {"U": (-1, 0), "D": (1, 0), "L": (0, -1), "R": (0, 1)}
-
+#Imprime la solución generada por el algorítmo BFS
 solucionAmplitud = busquedaPreferentePorAmplitud(estadoInicial,64)
 if solucionAmplitud:
     for movimiento in solucionAmplitud:
         print(movimiento)
 else:
     print("No se encontró solución.")
-
+#Imprime la solución generada por el algorítmo DFS
 solucionProfundidad = busquedaProfundidad(estadoInicial,64)
 if solucionProfundidad:
     for movimiento in solucionProfundidad:
         print(movimiento)
 else:
     print("No se encontró solución.")
-
+#Imprime la solución generada por el algorítmo IDDFS
 solucionIterativa = busquedaProfundidadIterativa(estadoInicial,64)
 if solucionIterativa:
     for movimiento in solucionIterativa:
