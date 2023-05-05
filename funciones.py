@@ -76,3 +76,39 @@ def busquedaPreferentePorAmplitud(estadoInicial, profundidadMaxima):
                 visitados.add(hijo)
                 cola.append((hijo, profundidadActual + 1))
     return None
+
+def busquedaProfundidad(estado_inicial, profundidad_maxima):
+    pila = [(estado_inicial, 0)]
+    visitados = set()
+    while pila:
+        estado_actual, profundidad_actual = pila.pop()
+        if estado_actual.es_estado_meta():
+            return estado_actual.solucion()
+        if profundidad_actual >= profundidad_maxima:
+            continue
+        for hijo in estado_actual.expandir():
+            if hijo not in visitados:
+                visitados.add(hijo)
+                pila.append((hijo, profundidad_actual + 1))
+    return None
+
+def busquedaProfundidadIterativa(estado_inicial, profundidad_maxima):
+    for profundidad in range(profundidad_maxima):
+        resultado = busquedaProfundidadLimitada(estado_inicial, profundidad)
+        if resultado is not None:
+            return resultado
+    return None
+
+def busquedaProfundidadLimitada(estado_actual, profundidad_maxima):
+    if estado_actual.es_estado_meta():
+        return estado_actual.solucion()
+
+    if profundidad_maxima == 0:
+        return None
+
+    for hijo in estado_actual.expandir():
+        resultado = busquedaProfundidadLimitada(hijo, profundidad_maxima - 1)
+        if resultado is not None:
+            return resultado
+
+    return None

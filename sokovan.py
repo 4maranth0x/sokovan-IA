@@ -4,7 +4,7 @@
 #Alejandro Lasso Medina. 2040393
 # #
 
-from funciones import leerMapa, busquedaPreferentePorAmplitud
+from funciones import leerMapa, busquedaPreferentePorAmplitud, busquedaProfundidad, busquedaProfundidadIterativa
 
 #Inicia el programa, recibe un archivo de texto y retorna el mapa, la posición del jugador, 
 #la posición de las cajas, el número de cajas faltantes y el número de cajas.
@@ -61,9 +61,23 @@ estadoMeta = set(tuple(c) for c in estadoMeta)
 #Diccionario para los movimientos
 movimientos = {"U": (-1, 0), "D": (1, 0), "L": (0, -1), "R": (0, 1)}
 
-solucion = busquedaPreferentePorAmplitud(estadoInicial,64)
-if solucion:
-    for movimiento in solucion:
+solucionAmplitud = busquedaPreferentePorAmplitud(estadoInicial,64)
+if solucionAmplitud:
+    for movimiento in solucionAmplitud:
+        print(movimiento)
+else:
+    print("No se encontró solución.")
+
+solucionProfundidad = busquedaProfundidad(estadoInicial,64)
+if solucionProfundidad:
+    for movimiento in solucionProfundidad:
+        print(movimiento)
+else:
+    print("No se encontró solución.")
+
+solucionIterativa = busquedaProfundidadIterativa(estadoInicial,64)
+if solucionIterativa:
+    for movimiento in solucionIterativa:
         print(movimiento)
 else:
     print("No se encontró solución.")
